@@ -32,7 +32,7 @@ An independent review then pointed out the core dependency: every control still 
 | --- | --- |
 | `case-study/` | The full case study (PDF) |
 | `exhibits/` | Workflow diagram and test screenshots (Exhibits A to F) |
-| `workflow/` | Agent instructions, JSON output schema, Power Fx formulas and workflow logic |
+| `workflow/` | Exported Foundry workflow (YAML), agent instructions, JSON output schema, Power Fx formulas and workflow logic |
 | `testing/` | Full test log and answer keys |
 
 ## Built with

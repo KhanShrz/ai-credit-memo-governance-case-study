@@ -1,6 +1,6 @@
 # Workflow logic (Foundry workflow, tested version 9)
 
-> The exported workflow YAML will be added as `workflow.yaml`. This file documents the same logic in plain form.
+> The exported Foundry workflow is in [`workflow.yaml`](workflow.yaml). This file explains the same logic in plain form.
 
 ## Node order
 
@@ -11,7 +11,7 @@ Start
 → Data-Retrieval-Agent (output saved to Local.Fin)
 → Send message: CALCULATOR TIE-OUT
 → Send message: GATE 1 REVIEW CHECKLIST
-→ Ask a question: Gate 1 decision (saved to Local.Gate1Decision, always ask)
+→ Ask a question: Gate 1 decision (saved to Local.Gate1Decision; skip mode: SkipOnFirstExecutionIfVariableHasValue, so it asks again on every send-back loop)
 → If / else:
     If       APPROVE and no figure missing → Send "Gate 1 APPROVED" → Send RATIO CALCULATOR
     Else if  Local.SendBackCount >= 2       → Send "ESCALATED ..."

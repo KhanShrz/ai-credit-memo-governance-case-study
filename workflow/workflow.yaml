@@ -1,0 +1,84 @@
+kind: workflow
+trigger:
+  kind: OnConversationStart
+  id: trigger_wf
+  actions:
+    - kind: SetVariable
+      id: node-1791429938256
+      variable: Local.SendBackCount
+      value: =0
+    - kind: InvokeAzureAgent
+      id: node-1791429674774
+      agent:
+        name: Intake-Agent
+      conversationId: =System.ConversationId
+      input:
+        messages: ""
+      output:
+        autoSend: true
+    - kind: InvokeAzureAgent
+      id: node-1791429731103
+      agent:
+        name: Data-Retrieval-Agent
+      conversationId: =System.ConversationId
+      input:
+        messages: ""
+      output:
+        autoSend: true
+        responseObject: Local.Fin
+    - kind: SendActivity
+      activity: |-
+        CALCULATOR TIE-OUT (formula, not AI)
+        FY2026: {If(Local.Fin.gross_margin.cy = 0 || Local.Fin.operating_income.cy = 0, "INPUT MISSING - FAIL", If(Local.Fin.gross_margin.cy - Local.Fin.research_and_development.cy - Local.Fin.sales_and_marketing.cy - Local.Fin.general_and_administrative.cy - Local.Fin.operating_income.cy = 0, "PASS", "FAIL"))}
+        FY2025: {If(Local.Fin.gross_margin.py = 0 || Local.Fin.operating_income.py = 0, "INPUT MISSING - FAIL", If(Local.Fin.gross_margin.py - Local.Fin.research_and_development.py - Local.Fin.sales_and_marketing.py - Local.Fin.general_and_administrative.py - Local.Fin.operating_income.py = 0, "PASS", "FAIL"))}
+      id: node-1791549828845
+    - kind: SendActivity
+      activity: |-
+        GATE 1 REVIEW CHECKLIST
+        1. Borrower in DOCUMENT CHECK matches the intake request
+        2. Fiscal year is the most recent filing
+        3. No items marked NOT FOUND
+        4. CALCULATOR TIE-OUT difference is 0 for BOTH years
+        5. Spot-check 2 figures against the cited page in the 10-K
+      id: node-1791429956133
+    - kind: Question
+      variable: Local.Gate1Decision
+      id: node-1791430014585
+      entity: StringPrebuiltEntity
+      skipQuestionMode: SkipOnFirstExecutionIfVariableHasValue
+      prompt: "Gate 1 decision: reply APPROVE, or SEND BACK followed by the reason."
+    - kind: ConditionGroup
+      conditions:
+        - condition: =StartsWith(Upper(Local.Gate1Decision), "APPROVE") && CountRows(Local.Fin.not_found) = 0
+          actions:
+            - kind: SendActivity
+              activity: Gate 1 APPROVED. Proceeding to ratio calculation
+              id: node-1791549937519
+            - kind: SendActivity
+              activity: |-
+                RATIO CALCULATOR (formula, not AI)
+                Interest coverage: FY2026 {If(Local.Fin.interest_expense.cy = 0, "INPUT MISSING", Text(Local.Fin.operating_income.cy / Local.Fin.interest_expense.cy, "0.00") & "x")} | FY2025 {If(Local.Fin.interest_expense.py = 0, "INPUT MISSING", Text(Local.Fin.operating_income.py / Local.Fin.interest_expense.py, "0.00") & "x")}
+                Current ratio: FY2026 {Text(Local.Fin.total_current_assets.cy / Local.Fin.total_current_liabilities.cy, "0.00")} | FY2025 {Text(Local.Fin.total_current_assets.py / Local.Fin.total_current_liabilities.py, "0.00")}
+                Debt-to-equity: FY2026 {Text((Local.Fin.current_portion_ltd.cy + Local.Fin.long_term_debt.cy) / Local.Fin.stockholders_equity.cy, "0.00")} | FY2025 {Text((Local.Fin.current_portion_ltd.py + Local.Fin.long_term_debt.py) / Local.Fin.stockholders_equity.py, "0.00")}
+                Total debt / EBITDA: FY2026 {Text((Local.Fin.current_portion_ltd.cy + Local.Fin.long_term_debt.cy) / (Local.Fin.operating_income.cy + Local.Fin.depreciation_amortization.cy), "0.00")}x | FY2025 {Text((Local.Fin.current_portion_ltd.py + Local.Fin.long_term_debt.py) / (Local.Fin.operating_income.py + Local.Fin.depreciation_amortization.py), "0.00")}x
+                Net margin: FY2026 {Text(Local.Fin.net_income.cy / Local.Fin.total_revenue.cy, "0.0%")} | FY2025 {Text(Local.Fin.net_income.py / Local.Fin.total_revenue.py, "0.0%")}
+              id: node-1791434249532
+          id: if-node-1791430086828-73sye7f1
+        - condition: =Local.SendBackCount >= 2
+          actions:
+            - kind: SendActivity
+              activity: "ESCALATED: data failed Gate 1 three times. Routed to senior credit officer. Last reason: {Local.Gate1Decision}"
+              id: node-1791434268254
+          id: if-node-1791430086828-1c7fbunc
+      id: node-1791430086828
+      elseActions:
+        - kind: SetVariable
+          id: node-1791434289678
+          variable: Local.SendBackCount
+          value: =Local.SendBackCount + 1
+        - kind: GotoAction
+          actionId: node-1791429731103
+          id: node-1791434524528
+id: ""
+name: test-workflow
+description: ""
