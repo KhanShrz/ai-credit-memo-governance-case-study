@@ -1,0 +1,39 @@
+{
+  "name": "financial_extract",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "$defs": {
+      "fig": {
+        "type": "object",
+        "properties": {"cy": {"type": "number"}, "py": {"type": "number"}, "page": {"type": "string"}},
+        "required": ["cy", "py", "page"],
+        "additionalProperties": false
+      }
+    },
+    "properties": {
+      "company": {"type": "string"},
+      "form_type": {"type": "string"},
+      "fiscal_year_end": {"type": "string"},
+      "total_revenue": {"$ref": "#/$defs/fig"},
+      "gross_margin": {"$ref": "#/$defs/fig"},
+      "research_and_development": {"$ref": "#/$defs/fig"},
+      "sales_and_marketing": {"$ref": "#/$defs/fig"},
+      "general_and_administrative": {"$ref": "#/$defs/fig"},
+      "operating_income": {"$ref": "#/$defs/fig"},
+      "net_income": {"$ref": "#/$defs/fig"},
+      "interest_expense": {"$ref": "#/$defs/fig"},
+      "depreciation_amortization": {"$ref": "#/$defs/fig"},
+      "cash_and_equivalents": {"$ref": "#/$defs/fig"},
+      "total_current_assets": {"$ref": "#/$defs/fig"},
+      "total_current_liabilities": {"$ref": "#/$defs/fig"},
+      "current_portion_ltd": {"$ref": "#/$defs/fig"},
+      "long_term_debt": {"$ref": "#/$defs/fig"},
+      "total_liabilities": {"$ref": "#/$defs/fig"},
+      "stockholders_equity": {"$ref": "#/$defs/fig"},
+      "not_found": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["company", "form_type", "fiscal_year_end", "total_revenue", "gross_margin", "research_and_development", "sales_and_marketing", "general_and_administrative", "operating_income", "net_income", "interest_expense", "depreciation_amortization", "cash_and_equivalents", "total_current_assets", "total_current_liabilities", "current_portion_ltd", "long_term_debt", "total_liabilities", "stockholders_equity", "not_found"],
+    "additionalProperties": false
+  }
+}
